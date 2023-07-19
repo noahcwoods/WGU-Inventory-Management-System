@@ -51,8 +51,16 @@ public class LoginPageController implements Initializable {
 
         if (authenticationCheck) {
 
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("/com/nwfinal/nwfinal/dashboard.fxml"));
+            loader.load();
+
+            DashboardController controller = loader.getController();
+
+            controller.sendLoggedInUser(userName);
+
             stage = ((Stage) ((Button) event.getSource()).getScene().getWindow());
-            scene = load(getClass().getResource("/com/nwfinal/nwfinal/dashboard.fxml"));
+            scene = loader.getRoot();
             stage.setScene(new Scene(scene));
             stage.show();
 

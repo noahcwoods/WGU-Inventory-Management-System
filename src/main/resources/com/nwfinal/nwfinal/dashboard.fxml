@@ -1,18 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.DatePicker?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1000.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nwfinal.nwfinal.Controller.DashboardController">
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1000.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nwfinal.nwfinal.Controller.DashboardController">
   <tabs>
     <Tab text="Customers">
       <content>
@@ -38,15 +29,15 @@
                                                             <Label layoutX="14.0" layoutY="213.0" text="Phone Number" />
                                                             <Label layoutX="14.0" layoutY="263.0" text="Country" />
                                                             <Label layoutX="14.0" layoutY="313.0" text="State/Province" />
-                                                            <ComboBox fx:id="existingCustomerCountryCombo" disable="true" layoutX="14.0" layoutY="280.0" prefWidth="150.0" />
-                                                            <ComboBox fx:id="existingCustomerStateCombo" disable="true" layoutX="14.0" layoutY="330.0" prefWidth="150.0" />
+                                                            <ComboBox fx:id="existingCustomerCountryCombo" disable="true" layoutX="14.0" layoutY="280.0" onAction="#existingCustomerCountryCombo" prefWidth="150.0" />
+                                                            <ComboBox fx:id="existingCustomerStateCombo" disable="true" layoutX="14.0" layoutY="330.0" onAction="#existingCustomerStateCombo" prefWidth="150.0" />
                                                             <TextField fx:id="existingCustomerNameTxt" editable="false" layoutX="14.0" layoutY="80.0" />
                                                             <TextField fx:id="existingCustomerAddressTxt" editable="false" layoutX="14.0" layoutY="130.0" />
                                                             <TextField fx:id="existingCustomerZipTxt" editable="false" layoutX="14.0" layoutY="180.0" />
                                                             <TextField fx:id="existingCustomerPhoneTxt" editable="false" layoutX="14.0" layoutY="230.0" />
-                                                            <Button disable="true" layoutX="122.0" layoutY="381.0" mnemonicParsing="false" onAction="#saveExistingCustomerBtn" text="Save" />
-                                                            <Button layoutX="204.0" layoutY="16.0" mnemonicParsing="false" onAction="#editExistingCustomerBtn" text="Edit" />
-                                                            <Button disable="true" layoutX="190.0" layoutY="50.0" mnemonicParsing="false" onAction="#deleteExistingCustomerBtn" text="Delete" />
+                                                            <Button fx:id="saveExistingCustomersBtn" disable="true" layoutX="122.0" layoutY="381.0" mnemonicParsing="false" onAction="#saveExistingCustomerBtn" text="Save" />
+                                                            <Button fx:id="editExistingCustomerBtn" layoutX="190.0" layoutY="16.0" mnemonicParsing="false" onAction="#editExistingCustomerBtn" text="Edit" />
+                                                            <Button fx:id="deleteExistingCustomerBtn" disable="true" layoutX="190.0" layoutY="50.0" mnemonicParsing="false" onAction="#deleteExistingCustomerBtn" text="Delete" />
                                                             <Label layoutX="13.0" layoutY="20.0" text="Customer ID" />
                                                             <TextField fx:id="existingCustomerIDTxt" editable="false" layoutX="95.0" layoutY="16.0" prefHeight="25.0" prefWidth="68.0" />
                                                          </children>
@@ -63,8 +54,8 @@
                                                             <Label layoutX="15.0" layoutY="170.0" text="Phone Number" />
                                                             <Label layoutX="15.0" layoutY="220.0" text="Country" />
                                                             <Label layoutX="15.0" layoutY="270.0" text="State/Province" />
-                                                            <ComboBox fx:id="newCustomerCountryTxt" layoutX="15.0" layoutY="237.0" prefWidth="150.0" />
-                                                            <ComboBox fx:id="newCustomerStateTxt" layoutX="15.0" layoutY="287.0" prefWidth="150.0" />
+                                                            <ComboBox fx:id="newCustomerCountryCombo" layoutX="15.0" layoutY="237.0" onAction="#newCustomerCountryCombo" prefWidth="150.0" />
+                                                            <ComboBox fx:id="newCustomerStateCombo" layoutX="15.0" layoutY="287.0" onAction="#newCustomerStateCombo" prefWidth="150.0" />
                                                             <TextField fx:id="newCustomerNameTxt" layoutX="15.0" layoutY="37.0" />
                                                             <TextField fx:id="newCustomerAddressTxt" layoutX="15.0" layoutY="87.0" />
                                                             <TextField fx:id="newCustomerZipTxt" layoutX="15.0" layoutY="137.0" />
@@ -80,7 +71,7 @@
                                     </AnchorPane>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                        <children>
-                                          <TableView fx:id="existingCustomerAssociatedAppointmentsTableView" layoutX="33.0" layoutY="29.0" prefHeight="213.0" prefWidth="265.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                          <TableView fx:id="existingCustomerAssociatedAppointmentsTableView" layoutX="13.0" layoutY="29.0" prefHeight="213.0" prefWidth="252.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="13.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                        </children>
                                     </AnchorPane>
                                 </items>
@@ -133,20 +124,20 @@
                                                 <Label layoutX="10.0" layoutY="349.0" text="Appointment Type" />
                                                 <TextField fx:id="existingApptTypeTxt" editable="false" layoutX="10.0" layoutY="366.0" prefHeight="25.0" prefWidth="150.0" />
                                                 <Label layoutX="10.0" layoutY="407.0" text="Start Date" />
-                                                <DatePicker fx:id="existingApptStartDate" layoutX="10.0" layoutY="424.0" prefHeight="25.0" prefWidth="84.0" />
-                                                <Label layoutX="106.0" layoutY="407.0" text="Start Time" />
+                                                <DatePicker fx:id="existingApptStartDate" disable="true" layoutX="10.0" layoutY="424.0" prefHeight="25.0" prefWidth="101.0" />
+                                                <Label layoutX="119.0" layoutY="407.0" text="Start Time" />
                                                 <Label layoutX="10.0" layoutY="467.0" text="End Date" />
-                                                <DatePicker fx:id="existingApptEndDate" layoutX="10.0" layoutY="484.0" prefHeight="25.0" prefWidth="84.0" />
-                                                <Label layoutX="108.0" layoutY="467.0" text="End Time" />
-                                                <ComboBox fx:id="existingApptStartTimeCombo" disable="true" layoutX="100.0" layoutY="424.0" prefHeight="25.0" prefWidth="60.0" />
-                                                <ComboBox fx:id="existingApptEndTimeCombo" disable="true" layoutX="100.0" layoutY="484.0" prefHeight="25.0" prefWidth="60.0" />
+                                                <DatePicker fx:id="existingApptEndDate" disable="true" layoutX="10.0" layoutY="484.0" prefHeight="25.0" prefWidth="101.0" />
+                                                <Label layoutX="119.0" layoutY="467.0" text="End Time" />
                                                 <Label layoutX="34.0" layoutY="536.0" text="Customer ID" />
                                                 <Label layoutX="61.0" layoutY="567.0" text="User ID" />
                                                 <TextField fx:id="existingApptCustomerIDTxt" editable="false" layoutX="110.0" layoutY="532.0" prefHeight="25.0" prefWidth="50.0" />
                                                 <TextField fx:id="ExistingApptUserIDTxt" editable="false" layoutX="110.0" layoutY="563.0" prefHeight="25.0" prefWidth="50.0" />
-                                                <Button layoutX="10.0" layoutY="610.0" mnemonicParsing="false" onAction="#existingApptSaveBtn" text="Save" />
-                                                <Button layoutX="202.0" layoutY="14.0" mnemonicParsing="false" onAction="#existingApptEditBtn" text="Edit" />
-                                                <Button layoutX="188.0" layoutY="47.0" mnemonicParsing="false" onAction="#existingApptDeleteBtn" text="Delete" />
+                                                <Button fx:id="existingApptSaveBtn" disable="true" layoutX="10.0" layoutY="610.0" mnemonicParsing="false" onAction="#existingApptSaveBtn" text="Save" />
+                                                <Button fx:id="existingApptEditBtn" layoutX="202.0" layoutY="14.0" mnemonicParsing="false" onAction="#existingApptEditBtn" text="Edit" />
+                                                <Button fx:id="existingApptDeleteBtn" disable="true" layoutX="188.0" layoutY="47.0" mnemonicParsing="false" onAction="#existingApptDeleteBtn" text="Delete" />
+                                                <TextField fx:id="existingApptStartTimeTxt" editable="false" layoutX="120.0" layoutY="424.0" prefHeight="25.0" prefWidth="68.0" />
+                                                <TextField fx:id="existingApptEndTimeTxt" editable="false" layoutX="120.0" layoutY="484.0" prefHeight="25.0" prefWidth="68.0" />
                                              </children>
                                           </AnchorPane>
                                     </content>
@@ -173,13 +164,13 @@
                                                 <Label layoutX="10.0" layoutY="467.0" text="End Date" />
                                                 <DatePicker fx:id="newApptEndDate" layoutX="10.0" layoutY="484.0" prefHeight="25.0" prefWidth="84.0" />
                                                 <Label layoutX="108.0" layoutY="467.0" text="End Time" />
-                                                <ComboBox fx:id="newApptStartTimeCombo" layoutX="100.0" layoutY="424.0" prefHeight="25.0" prefWidth="60.0" />
-                                                <ComboBox fx:id="newApptEndTimeCombo" layoutX="100.0" layoutY="484.0" prefHeight="25.0" prefWidth="60.0" />
                                                 <Label layoutX="34.0" layoutY="536.0" text="Customer ID" />
                                                 <Label layoutX="61.0" layoutY="567.0" text="User ID" />
-                                                <TextField fx:id="newApptCustomerIDTxt" editable="false" layoutX="110.0" layoutY="532.0" prefHeight="25.0" prefWidth="50.0" />
-                                                <TextField fx:id="newApptUserIDTxt" editable="false" layoutX="110.0" layoutY="563.0" prefHeight="25.0" prefWidth="50.0" />
+                                                <TextField fx:id="newApptCustomerIDTxt" layoutX="110.0" layoutY="532.0" prefHeight="25.0" prefWidth="50.0" />
+                                                <TextField fx:id="newApptUserIDTxt" layoutX="110.0" layoutY="563.0" prefHeight="25.0" prefWidth="50.0" />
                                                 <Button layoutX="10.0" layoutY="610.0" mnemonicParsing="false" onAction="#newApptCreateBtn" text="Create" />
+                                                <TextField fx:id="newApptStartTimeTxt" layoutX="106.0" layoutY="424.0" prefHeight="25.0" prefWidth="58.0" />
+                                                <TextField fx:id="newApptEndTimeTxt" layoutX="106.0" layoutY="484.0" prefHeight="25.0" prefWidth="58.0" />
                                             </children>
                                         </AnchorPane>
                                     </content>
