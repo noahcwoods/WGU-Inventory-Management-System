@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ResourceBundleManager">
+    <file url="file://$PROJECT_DIR$/src/main/resources/rb.properties" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/rb_en_FR.properties" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/rb_en_US.properties" />
+    <custom-resource-bundle>
+      <file value="file://$PROJECT_DIR$/src/main/java/com/nwfinal/nwfinal/Controller/languages.properties" />
+      <file value="file://$PROJECT_DIR$/src/main/java/com/nwfinal/nwfinal/Controller/languages_en_US.properties" />
+      <file value="file://$PROJECT_DIR$/src/main/java/com/nwfinal/nwfinal/Controller/languages_en_fr.properties" />
+      <file value="file://$PROJECT_DIR$/src/main/resources/rb.properties" />
+      <file value="file://$PROJECT_DIR$/src/main/resources/rb_en_FR.properties" />
+      <file value="file://$PROJECT_DIR$/src/main/resources/rb_en_US.properties" />
+      <base-name>rb</base-name>
+    </custom-resource-bundle>
+  </component>
+</project>

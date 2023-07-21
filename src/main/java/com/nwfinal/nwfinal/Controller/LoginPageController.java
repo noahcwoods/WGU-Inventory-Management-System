@@ -17,12 +17,28 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.ZoneId;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
 import static javafx.fxml.FXMLLoader.*;
 
 public class LoginPageController implements Initializable {
+
+    ResourceBundle rb = ResourceBundle.getBundle("rb");
+
+    @FXML
+    private Button loginBtn;
+
+    @FXML
+    private Label passwordLbl;
+
+    @FXML
+    private Label zoneIDTextLbl;
+
+    @FXML
+    private Label usernameLbl;
 
     Stage stage;
     Parent scene;
@@ -65,13 +81,30 @@ public class LoginPageController implements Initializable {
             stage.show();
 
         }else {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "The username or password is incorrect, please try again...");
+            Alert alert = new Alert(Alert.AlertType.ERROR, rb.getString("alert"));
             alert.show();
         }
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
+        ZoneId.getAvailableZoneIds().stream().sorted().forEach(System.out::println);
+
+
+        ZoneId z = ZoneId.systemDefault();
+
+
+        zoneIDLbl.setText(z.toString());
+
+
+        usernameLbl.setText(rb.getString("username"));
+        passwordLbl.setText(rb.getString("password"));
+        zoneIDTextLbl.setText(rb.getString("zoneid"));
+        loginBtn.setText(rb.getString("login"));
+
+
+
 
     }
 }

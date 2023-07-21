@@ -16,15 +16,16 @@ import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 import java.net.URL;
 import java.sql.*;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.ResourceBundle;
+import java.util.*;
+
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import java.sql.ResultSet;
+import java.util.Date;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -50,8 +51,6 @@ public class DashboardController implements Initializable {
     private ObservableList<String> stateOptions = FXCollections.observableArrayList();
     private ObservableList<String> contactOptions = FXCollections.observableArrayList();
     private String loggedInUser;
-
-
 
     @FXML
     private TextField existingApptEndTimeTxt;
@@ -94,7 +93,7 @@ public class DashboardController implements Initializable {
     private TextArea existingApptDescTxt;
 
     @FXML
-    private DatePicker existingApptEndDate;
+    private TextField existingApptEndDate;
 
     @FXML
     private TextField existingApptIDTxt;
@@ -103,7 +102,7 @@ public class DashboardController implements Initializable {
     private TextField existingApptLocationTxt;
 
     @FXML
-    private DatePicker existingApptStartDate;
+    private TextField existingApptStartDate;
 
     @FXML
     private TextField existingApptTitleTxt;
@@ -189,12 +188,11 @@ public class DashboardController implements Initializable {
     }
 
     @FXML
-    void allApptSelectedClick(MouseEvent event) throws SQLException {
+    void allApptSelectedClick(MouseEvent event) throws SQLException, ParseException {
 
         ObservableList<Object> obj = FXCollections.observableArrayList(allAppointmentsTableView.getSelectionModel().getSelectedItem());
         String selectedItem = obj.toString();
-        char itemIndex = selectedItem.charAt(2);
-        int index = Character.getNumericValue(itemIndex);
+        int index = new Scanner(selectedItem).useDelimiter("\\D+").nextInt();
         int customerID = -1;
         String startDate = null;
         String endDate = null;
@@ -218,19 +216,18 @@ public class DashboardController implements Initializable {
             startDate = selectedAppointment.getString("Start");
 
         }
-        String[] start = startDate.split("\\s+");
-        String[] end = endDate.split("\\s+");
 
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        existingApptStartDate.setValue(LocalDate.parse(start[0], format));
-        existingApptEndDate.setValue(LocalDate.parse(end[0], format));
+        String convertedStartDate = convertToLocal(startDate);
+        String convertedEndDate = convertToLocal(endDate);
+
+        String[] start = convertedStartDate.split("\\s+");
+        String[] end = convertedEndDate.split("\\s+");
+
+        existingApptEndDate.setText(start[0]);
+        existingApptStartDate.setText(end[0]);
 
         existingApptStartTimeTxt.setText(start[1]);
         existingApptEndTimeTxt.setText(end[1]);
-
-
-
-
 
     }
     @FXML
@@ -252,8 +249,7 @@ public class DashboardController implements Initializable {
         ObservableList<Object> obj = FXCollections.observableArrayList(allCustomersTableView.getSelectionModel().getSelectedItem());
 
         String selectedItem = obj.toString();
-        char itemIndex = selectedItem.charAt(2);
-        int index = Character.getNumericValue(itemIndex);
+        int index = new Scanner(selectedItem).useDelimiter("\\D+").nextInt();
         int customerID = -1;
 
         ResultSet selectedCustomer = customersQuery.select(index);
@@ -281,7 +277,7 @@ public class DashboardController implements Initializable {
         }
 
         ResultSet associatedAppointments = appointmentsQuery.select(customerID);
-        buildData(associatedAppointments, existingCustomerAssociatedAppointmentsTableView, filteredAppointments);
+        //buildData(associatedAppointments, existingCustomerAssociatedAppointmentsTableView, filteredAppointments);
 
     }
 
@@ -293,8 +289,6 @@ public class DashboardController implements Initializable {
         customersQuery.delete(customerID);
         updateAllTables();
         toggleEdit();
-
-
 
     }
 
@@ -319,22 +313,72 @@ public class DashboardController implements Initializable {
     }
 
     @FXML
-    void existingApptDeleteBtn(ActionEvent event) {
+    void existingApptDeleteBtn(ActionEvent event) throws SQLException {
+        int apptID = Integer.parseInt(existingApptIDTxt.getText());
 
+        appointmentsQuery.delete(apptID);
+        updateAllTables();
+        toggleApptEdit();
     }
 
     @FXML
     void existingApptEditBtn(ActionEvent event) {
+        if (Objects.equals(existingApptEditBtn.getText(), "Cancel")){
+            toggleApptEdit();
+        }else {
+            existingApptTitleTxt.setEditable(true);
+            existingApptDescTxt.setEditable(true);
+            existingApptLocationTxt.setEditable(true);
+            existingApptContactCombo.setDisable(false);
+            existingApptTypeTxt.setEditable(true);
+            existingApptStartDate.setEditable(true);
+            existingApptStartTimeTxt.setEditable(true);
+            existingApptEndDate.setEditable(true);
+            existingApptEndTimeTxt.setEditable(true);
+            existingApptCustomerIDTxt.setEditable(true);
+            ExistingApptUserIDTxt.setEditable(true);
 
+            existingApptEditBtn.setText("Cancel");
+            existingApptDeleteBtn.setDisable(false);
+            existingApptSaveBtn.setDisable(false);
+            allAppointmentsTableView.setDisable(true);
+
+        }
     }
 
     @FXML
-    void existingApptSaveBtn(ActionEvent event) {
+    void existingApptSaveBtn(ActionEvent event) throws SQLException, ParseException {
+        int apptID = Integer.parseInt(existingApptIDTxt.getText());
+        String apptTitle = existingApptTitleTxt.getText();
+        String apptDesc = existingApptDescTxt.getText();
+        String apptLocation = existingApptLocationTxt.getText();
+        String apptContact = existingApptContactCombo.getSelectionModel().getSelectedItem();
+        int contactID = -1;
+        ResultSet getContactID = contactsQuery.select(apptContact);
+        while(getContactID.next()){
+            contactID = getContactID.getInt("Contact_ID");
+        }
+        String apptType = existingApptTypeTxt.getText();
+        String startDateTime;
+        String endDateTime;
+        String lastUpdateDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("UTC")).format(Instant.now());
+        String lastUpdatedBy = this.loggedInUser;
+        int customerID = Integer.parseInt(existingApptCustomerIDTxt.getText());
+        int userID = Integer.parseInt(ExistingApptUserIDTxt.getText());
 
+        String localStartDateTime = existingApptStartDate.getText() + " " + existingApptStartTimeTxt.getText();
+        String localEndDateTime = existingApptEndDate.getText() + " " + existingApptEndTimeTxt.getText();
+
+        startDateTime = convertToUTC(localStartDateTime);
+        endDateTime = convertToUTC(localEndDateTime);
+
+        appointmentsQuery.update(apptID, apptTitle, apptDesc, apptLocation, apptType, startDateTime, endDateTime, lastUpdateDate, lastUpdatedBy, customerID, userID, contactID);
+        updateAllTables();
+        toggleApptEdit();
     }
 
     @FXML
-    void newApptCreateBtn(ActionEvent event) throws SQLException {
+    void newApptCreateBtn(ActionEvent event) throws SQLException, ParseException {
         String apptTitle = newApptTitleTxt.getText();
         String apptDesc = newApptDescTxt.getText();
         String apptLocation = newApptLocationTxt.getText();
@@ -354,9 +398,14 @@ public class DashboardController implements Initializable {
         int customerID = Integer.parseInt(newApptCustomerIDTxt.getText());
         int userID = Integer.parseInt(newApptUserIDTxt.getText());
 
-        startDateTime = String.valueOf(newApptStartDate.getValue()) + " " + newApptStartTimeTxt.getText();
-        System.out.println(startDateTime);
-        endDateTime = String.valueOf(newApptEndDate.getValue()) + " " + newApptEndTimeTxt.getText();
+        String localStartDateTime = newApptStartDate.getValue() + " " + newApptStartTimeTxt.getText();
+        String localEndDateTime = newApptEndDate.getValue() + " " + newApptEndTimeTxt.getText();
+
+        startDateTime = convertToUTC(localStartDateTime);
+        endDateTime = convertToUTC(localEndDateTime);
+
+
+
 
         appointmentsQuery.insert(apptTitle, apptDesc, apptLocation, apptType, startDateTime, endDateTime, createDate, createdBy, lastUpdateDate, lastUpdatedBy, customerID, userID, contactID);
         updateAllTables();
@@ -435,8 +484,36 @@ public class DashboardController implements Initializable {
         try {
             ResultSet populateCustomersTable = customersQuery.select();
             ResultSet populateAppointmentsTable = appointmentsQuery.select();
+
+
+            System.out.println(allAppointmentsTableView.getItems().size());
+
+            if (allAppointmentsTableView.getColumns() != null){
+                allAppointmentsTableView.getColumns().clear();
+            }
+            if (allCustomersTableView.getColumns() != null){
+                allCustomersTableView.getColumns().clear();
+            }
+            if (existingCustomerAssociatedAppointmentsTableView.getColumns() != null){
+                existingCustomerAssociatedAppointmentsTableView.getColumns().clear();
+            }
+
+            if (allCustomers != null){
+                allCustomers.clear();
+            }
+            if (allAppointments != null){
+                allAppointments.clear();
+            }
+            if (countryOptions != null){
+                countryOptions.clear();
+            }
+            if (contactOptions != null){
+                contactOptions.clear();
+            }
+            //System.out.println(allAppointments);
+
             buildData(populateCustomersTable, allCustomersTableView, allCustomers);
-            buildData(populateAppointmentsTable, allAppointmentsTableView, allAppointments);
+            buildDataAppt(populateAppointmentsTable, allAppointmentsTableView, allAppointments);
 
 
             ResultSet populateCountriesCombo = countriesQuery.select();
@@ -460,10 +537,12 @@ public class DashboardController implements Initializable {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public void buildData(ResultSet rs, TableView tb, ObservableList<ObservableList> list){
+    public void buildData(ResultSet rs, TableView tb, ObservableList<ObservableList> list)throws Exception{
 
         list = FXCollections.observableArrayList();
 
@@ -485,7 +564,81 @@ public class DashboardController implements Initializable {
             while (rs.next()) {
                 ObservableList<String> row = FXCollections.observableArrayList();
                 for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-                    row.add(rs.getString(i));
+
+                    if (i == 6 || i == 8){
+                        String date = rs.getString(i);
+                        String[] actualDate = date.split("\\s+");
+                        String[] actualTime = actualDate[1].split(":");
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        Date date1 = sdf.parse(actualDate[0]);
+
+
+
+                        LocalDate date2 = date1.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+                        LocalDateTime ldt = LocalDateTime.of(date2.getYear(), date2.getMonth(), date2.getDayOfMonth(), Integer.parseInt(actualTime[0]), Integer.parseInt(actualTime[1]), Integer.parseInt(actualTime[2]));
+                        OffsetDateTime odt = ldt.atOffset(ZoneOffset.UTC);
+                        ZoneId z = ZoneId.systemDefault();
+                        ZonedDateTime zdt = odt.atZoneSameInstant(z);
+                        DateTimeFormatter customFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                        row.add(customFormat.format(zdt));
+                    }else {
+                        row.add(rs.getString(i));
+                    }
+
+
+                }
+                list.add(row);
+
+            }
+            tb.setItems(list);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void buildDataAppt(ResultSet rs, TableView tb, ObservableList<ObservableList> list)throws Exception{
+
+        list = FXCollections.observableArrayList();
+
+
+        try {
+            //rs = usersQuery.select();
+
+            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
+                final int j = i;
+                TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
+                col.setCellValueFactory(new Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>() {
+                    public ObservableValue<String> call(CellDataFeatures<ObservableList, String> param) {
+                        return new SimpleStringProperty(param.getValue().get(j).toString());
+                    }
+                });
+
+                tb.getColumns().addAll(col);
+            }
+            while (rs.next()) {
+                ObservableList<String> row = FXCollections.observableArrayList();
+                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+
+                    if (i == 6 || i == 7 || i == 8 || i == 10){
+                        String date = rs.getString(i);
+                        String[] actualDate = date.split("\\s+");
+                        String[] actualTime = actualDate[1].split(":");
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        Date date1 = sdf.parse(actualDate[0]);
+                        LocalDate date2 = date1.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                        LocalDateTime ldt = LocalDateTime.of(date2.getYear(), date2.getMonth(), date2.getDayOfMonth(), Integer.parseInt(actualTime[0]), Integer.parseInt(actualTime[1]), Integer.parseInt(actualTime[2]));
+                        OffsetDateTime odt = ldt.atOffset(ZoneOffset.UTC);
+                        ZoneId z = ZoneId.systemDefault();
+                        ZonedDateTime zdt = odt.atZoneSameInstant(z);
+                        DateTimeFormatter customFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                        row.add(customFormat.format(zdt));
+                    }else {
+                        row.add(rs.getString(i));
+                    }
+
+
                 }
                 list.add(row);
 
@@ -542,5 +695,72 @@ public class DashboardController implements Initializable {
         existingCustomerStateCombo.getSelectionModel().select("");
         existingCustomerIDTxt.setText("");
         editExistingCustomerBtn.setText("Edit");
+    }
+
+    public void toggleApptEdit(){
+        allAppointmentsTableView.setDisable(false);
+        existingApptTitleTxt.setEditable(false);
+        existingApptDescTxt.setEditable(false);
+        existingApptLocationTxt.setEditable(false);
+        existingApptContactCombo.setDisable(true);
+        existingApptTypeTxt.setEditable(false);
+        existingApptStartDate.setEditable(false);
+        existingApptStartTimeTxt.setEditable(false);
+        existingApptEndDate.setEditable(false);
+        existingApptEndTimeTxt.setEditable(false);
+        existingApptCustomerIDTxt.setEditable(false);
+        ExistingApptUserIDTxt.setEditable(false);
+
+        existingApptTitleTxt.setText("");
+        existingApptDescTxt.setText("");
+        existingApptLocationTxt.setText("");
+        existingApptContactCombo.getSelectionModel().select("");
+        existingApptTypeTxt.setText("");
+        existingApptStartDate.setText("");
+        existingApptStartTimeTxt.setText("");
+        existingApptEndDate.setText("");
+        existingApptEndTimeTxt.setText("");
+        existingApptCustomerIDTxt.setText("");
+        ExistingApptUserIDTxt.setText("");
+        existingApptIDTxt.setText("");
+
+        existingApptEditBtn.setText("Edit");
+        existingApptDeleteBtn.setDisable(true);
+        existingApptSaveBtn.setDisable(true);
+        allAppointmentsTableView.getSelectionModel().clearSelection();
+
+
+    }
+
+    public String convertToUTC(String date) throws ParseException {
+
+        String[] actualDate = date.split("\\s+");
+        String[] actualTime = actualDate[1].split(":");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date date1 = sdf.parse(actualDate[0]);
+        ZoneId z = ZoneId.systemDefault();
+        LocalDate date2 = date1.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDateTime ldt = LocalDateTime.of(date2.getYear(), date2.getMonth(), date2.getDayOfMonth(), Integer.parseInt(actualTime[0]), Integer.parseInt(actualTime[1]), Integer.parseInt(actualTime[2]));
+        ZonedDateTime zdt = ldt.atZone(z);
+        ZonedDateTime utc = zdt.withZoneSameInstant(ZoneId.of("UTC"));
+        DateTimeFormatter customFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return customFormat.format(utc);
+
+    }
+    public String convertToLocal(String date) throws ParseException {
+
+
+        String[] actualDate = date.split("\\s+");
+        String[] actualTime = actualDate[1].split(":");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date date1 = sdf.parse(actualDate[0]);
+        LocalDate date2 = date1.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDateTime ldt = LocalDateTime.of(date2.getYear(), date2.getMonth(), date2.getDayOfMonth(), Integer.parseInt(actualTime[0]), Integer.parseInt(actualTime[1]), Integer.parseInt(actualTime[2]));
+        OffsetDateTime odt = ldt.atOffset(ZoneOffset.UTC);
+        ZoneId z = ZoneId.systemDefault();
+        ZonedDateTime zdt = odt.atZoneSameInstant(z);
+        DateTimeFormatter customFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        return customFormat.format(zdt);
     }
 }

@@ -44,4 +44,29 @@ public abstract class appointmentsQuery {
         ps.setInt(13, contactID);
         ps.executeUpdate();
     }
+
+    public static void update(int apptID, String apptTitle, String apptDesc, String apptLocation, String apptType, String startDateTime, String endDateTime, String lastUpdateDate, String lastUpdatedBy, int customerID, int userID, int contactID) throws SQLException {
+        String sql = "UPDATE appointments SET Title = ?, Description = ?, Location = ?, Type = ?, Start = ?, End = ?, Last_Update = ?, Last_Updated_By = ?, Customer_ID = ?, User_ID = ?, Contact_ID = ? WHERE Appointment_ID = ?";
+        PreparedStatement ps = JDBC.connection.prepareStatement(sql);
+        ps.setString(1, apptTitle);
+        ps.setString(2, apptDesc);
+        ps.setString(3, apptLocation);
+        ps.setString(4, apptType);
+        ps.setString(5, startDateTime);
+        ps.setString(6, endDateTime);
+        ps.setString(7, lastUpdateDate);
+        ps.setString(8, lastUpdatedBy);
+        ps.setInt(9, customerID);
+        ps.setInt(10, userID);
+        ps.setInt(11, contactID);
+        ps.setInt(12, apptID);
+        ps.executeUpdate();
+    }
+
+    public static void delete(int apptID) throws SQLException {
+        String sql = "DELETE FROM appointments WHERE Appointment_ID = ?";
+        PreparedStatement ps = JDBC.connection.prepareStatement(sql);
+        ps.setInt(1, apptID);
+        ps.executeUpdate();
+    }
 }
