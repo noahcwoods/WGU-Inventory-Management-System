@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public abstract class appointmentsQuery {
     public static ResultSet select() throws SQLException {
-        String sql = "SELECT * FROM appointments";
+        String sql = "SELECT Appointment_ID, Title, Description, Location, Type, Start, End, Create_Date, Created_By, Last_Update, Last_Updated_By, Customer_ID, User_ID, c.Contact_ID, Contact_Name, Email FROM appointments JOIN contacts c on appointments.Contact_ID = c.Contact_ID";
         PreparedStatement ps = JDBC.connection.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
         return rs;

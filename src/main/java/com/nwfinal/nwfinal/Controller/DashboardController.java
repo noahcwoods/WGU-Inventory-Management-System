@@ -51,6 +51,7 @@ public class DashboardController implements Initializable {
     private ObservableList<String> stateOptions = FXCollections.observableArrayList();
     private ObservableList<String> contactOptions = FXCollections.observableArrayList();
     private String loggedInUser;
+    private long loginTime;
 
     @FXML
     private TextField existingApptEndTimeTxt;
@@ -186,48 +187,51 @@ public class DashboardController implements Initializable {
     void newCustomerStateCombo(ActionEvent event) {
 
     }
-
     @FXML
     void allApptSelectedClick(MouseEvent event) throws SQLException, ParseException {
 
-        ObservableList<Object> obj = FXCollections.observableArrayList(allAppointmentsTableView.getSelectionModel().getSelectedItem());
-        String selectedItem = obj.toString();
-        int index = new Scanner(selectedItem).useDelimiter("\\D+").nextInt();
-        int customerID = -1;
-        String startDate = null;
-        String endDate = null;
+        try {
+            ObservableList<Object> obj = FXCollections.observableArrayList(allAppointmentsTableView.getSelectionModel().getSelectedItem());
+            String selectedItem = obj.toString();
+            int index = new Scanner(selectedItem).useDelimiter("\\D+").nextInt();
+            int customerID = -1;
+            String startDate = null;
+            String endDate = null;
 
-        ResultSet selectedAppointment = appointmentsQuery.selectChosen(index);
-        while (selectedAppointment.next()){
-            existingApptIDTxt.setText(selectedAppointment.getString("Appointment_ID"));
-            existingApptTitleTxt.setText(selectedAppointment.getString("Title"));
-            existingApptDescTxt.setText(selectedAppointment.getString("Description"));
-            existingApptLocationTxt.setText(selectedAppointment.getString("Location"));
-            int contactID = Integer.parseInt(selectedAppointment.getString("Contact_ID"));
-            ResultSet contact = contactsQuery.select(contactID);
-            while (contact.next()){
-                String contactName = contact.getString("Contact_Name");
-                existingApptContactCombo.getSelectionModel().select(contactName);
+            ResultSet selectedAppointment = appointmentsQuery.selectChosen(index);
+            while (selectedAppointment.next()){
+                existingApptIDTxt.setText(selectedAppointment.getString("Appointment_ID"));
+                existingApptTitleTxt.setText(selectedAppointment.getString("Title"));
+                existingApptDescTxt.setText(selectedAppointment.getString("Description"));
+                existingApptLocationTxt.setText(selectedAppointment.getString("Location"));
+                int contactID = Integer.parseInt(selectedAppointment.getString("Contact_ID"));
+                ResultSet contact = contactsQuery.select(contactID);
+                while (contact.next()){
+                    String contactName = contact.getString("Contact_Name");
+                    existingApptContactCombo.getSelectionModel().select(contactName);
+                }
+                existingApptTypeTxt.setText(selectedAppointment.getString("Type"));
+                existingApptCustomerIDTxt.setText(selectedAppointment.getString("Customer_ID"));
+                ExistingApptUserIDTxt.setText(selectedAppointment.getString("User_ID"));
+                endDate = selectedAppointment.getString("End");
+                startDate = selectedAppointment.getString("Start");
+
             }
-            existingApptTypeTxt.setText(selectedAppointment.getString("Type"));
-            existingApptCustomerIDTxt.setText(selectedAppointment.getString("Customer_ID"));
-            ExistingApptUserIDTxt.setText(selectedAppointment.getString("User_ID"));
-            endDate = selectedAppointment.getString("End");
-            startDate = selectedAppointment.getString("Start");
+
+            String convertedStartDate = convertToLocal(startDate);
+            String convertedEndDate = convertToLocal(endDate);
+
+            String[] start = convertedStartDate.split("\\s+");
+            String[] end = convertedEndDate.split("\\s+");
+
+            existingApptEndDate.setText(start[0]);
+            existingApptStartDate.setText(end[0]);
+
+            existingApptStartTimeTxt.setText(start[1]);
+            existingApptEndTimeTxt.setText(end[1]);
+        }catch (Exception e){
 
         }
-
-        String convertedStartDate = convertToLocal(startDate);
-        String convertedEndDate = convertToLocal(endDate);
-
-        String[] start = convertedStartDate.split("\\s+");
-        String[] end = convertedEndDate.split("\\s+");
-
-        existingApptEndDate.setText(start[0]);
-        existingApptStartDate.setText(end[0]);
-
-        existingApptStartTimeTxt.setText(start[1]);
-        existingApptEndTimeTxt.setText(end[1]);
 
     }
     @FXML
@@ -246,38 +250,49 @@ public class DashboardController implements Initializable {
     @FXML
     void customerSelectedFromViewClick(MouseEvent event) throws Exception {
 
-        ObservableList<Object> obj = FXCollections.observableArrayList(allCustomersTableView.getSelectionModel().getSelectedItem());
 
-        String selectedItem = obj.toString();
-        int index = new Scanner(selectedItem).useDelimiter("\\D+").nextInt();
-        int customerID = -1;
 
-        ResultSet selectedCustomer = customersQuery.select(index);
+        try {
+            ObservableList<Object> obj = FXCollections.observableArrayList(allCustomersTableView.getSelectionModel().getSelectedItem());
+            String selectedItem = obj.toString();
+            int index = new Scanner(selectedItem).useDelimiter("\\D+").nextInt();
+            int customerID = -1;
 
-        while (selectedCustomer.next()){
-            existingCustomerNameTxt.setText(selectedCustomer.getString("Customer_Name"));
-            existingCustomerIDTxt.setText(String.valueOf(selectedCustomer.getInt("Customer_ID")));
-            existingCustomerAddressTxt.setText(selectedCustomer.getString("Address"));
-            existingCustomerZipTxt.setText(selectedCustomer.getString("Postal_Code"));
-            existingCustomerPhoneTxt.setText(selectedCustomer.getString("Phone"));
-            customerID = selectedCustomer.getInt("Customer_ID");
+            ResultSet selectedCustomer = customersQuery.select(index);
 
-            int divisionID = Integer.parseInt(selectedCustomer.getString("Division_ID"));
-            ResultSet customerCountryCode = firstLevelDivisionsQuery.select(divisionID);
-            while (customerCountryCode.next()){
-                int countryCode = Integer.parseInt(customerCountryCode.getString("country_ID"));
-                String divisionName = customerCountryCode.getString("Division");
-                existingCustomerStateCombo.getSelectionModel().select(divisionName);
-                ResultSet customerCountryName = countriesQuery.select(countryCode);
-                while (customerCountryName.next()){
-                    String countryName = customerCountryName.getString("Country");
-                    existingCustomerCountryCombo.getSelectionModel().select(countryName);
+            while (selectedCustomer.next()){
+                existingCustomerNameTxt.setText(selectedCustomer.getString("Customer_Name"));
+                existingCustomerIDTxt.setText(String.valueOf(selectedCustomer.getInt("Customer_ID")));
+                existingCustomerAddressTxt.setText(selectedCustomer.getString("Address"));
+                existingCustomerZipTxt.setText(selectedCustomer.getString("Postal_Code"));
+                existingCustomerPhoneTxt.setText(selectedCustomer.getString("Phone"));
+                customerID = selectedCustomer.getInt("Customer_ID");
+
+                int divisionID = Integer.parseInt(selectedCustomer.getString("Division_ID"));
+                ResultSet customerCountryCode = firstLevelDivisionsQuery.select(divisionID);
+                while (customerCountryCode.next()){
+                    int countryCode = Integer.parseInt(customerCountryCode.getString("country_ID"));
+                    String divisionName = customerCountryCode.getString("Division");
+                    existingCustomerStateCombo.getSelectionModel().select(divisionName);
+                    ResultSet customerCountryName = countriesQuery.select(countryCode);
+                    while (customerCountryName.next()){
+                        String countryName = customerCountryName.getString("Country");
+                        existingCustomerCountryCombo.getSelectionModel().select(countryName);
+                    }
                 }
             }
+
+            ResultSet associatedAppointments = appointmentsQuery.select(customerID);
+            if (existingCustomerAssociatedAppointmentsTableView != null){
+                existingCustomerAssociatedAppointmentsTableView.getColumns().clear();
+            }
+            buildDataAppt(associatedAppointments, existingCustomerAssociatedAppointmentsTableView, filteredAppointments);
+
+        }catch (Exception e){
+
         }
 
-        ResultSet associatedAppointments = appointmentsQuery.select(customerID);
-        buildDataAppt(associatedAppointments, existingCustomerAssociatedAppointmentsTableView, filteredAppointments);
+
 
     }
 
@@ -387,9 +402,15 @@ public class DashboardController implements Initializable {
         startDateTime = convertToUTC(localStartDateTime);
         endDateTime = convertToUTC(localEndDateTime);
 
-        appointmentsQuery.update(apptID, apptTitle, apptDesc, apptLocation, apptType, startDateTime, endDateTime, lastUpdateDate, lastUpdatedBy, customerID, userID, contactID);
-        updateAllTables();
-        toggleApptEdit();
+        String start = startDateTime.toString();
+        String end = endDateTime.toString();
+        ResultSet overlap = appointmentsQuery.select(customerID);
+
+        if (appointmentTimeVerification(startDateTime, endDateTime) && !overlappingAppointmentsCheck(overlap, start, end, apptID)){
+            appointmentsQuery.update(apptID, apptTitle, apptDesc, apptLocation, apptType, startDateTime, endDateTime, lastUpdateDate, lastUpdatedBy, customerID, userID, contactID);
+            updateAllTables();
+            toggleApptEdit();
+        }
     }
 
     @FXML
@@ -419,23 +440,31 @@ public class DashboardController implements Initializable {
         startDateTime = convertToUTC(localStartDateTime);
         endDateTime = convertToUTC(localEndDateTime);
 
+        String start = startDateTime.toString();
+        String end = endDateTime.toString();
+
+        ResultSet verifyApptOverlap = appointmentsQuery.select(customerID);
+        //boolean test = overlappingAppointmentsCheck(verifyApptOverlap, start, end);
+        //System.out.println(test);
 
 
+        if (appointmentTimeVerification(startDateTime, endDateTime) && !overlappingAppointmentsCheck(verifyApptOverlap, start, end, -1)){
+            appointmentsQuery.insert(apptTitle, apptDesc, apptLocation, apptType, startDateTime, endDateTime, createDate, createdBy, lastUpdateDate, lastUpdatedBy, customerID, userID, contactID);
+            updateAllTables();
+            newApptTitleTxt.setText("");
+            newApptDescTxt.setText("");
+            newApptLocationTxt.setText("");
+            newApptContactCombo.getSelectionModel().select("");
+            newApptTypeTxt.setText("");
+            newApptCustomerIDTxt.setText("");
+            newApptUserIDTxt.setText("");
+            newApptStartTimeTxt.setText("");
+            newApptEndTimeTxt.setText("");
+            newApptStartDate.getEditor().clear();
+            newApptEndDate.getEditor().clear();
 
-        appointmentsQuery.insert(apptTitle, apptDesc, apptLocation, apptType, startDateTime, endDateTime, createDate, createdBy, lastUpdateDate, lastUpdatedBy, customerID, userID, contactID);
-        updateAllTables();
+        }
 
-        newApptTitleTxt.setText("");
-        newApptDescTxt.setText("");
-        newApptLocationTxt.setText("");
-        newApptContactCombo.getSelectionModel().select("");
-        newApptTypeTxt.setText("");
-        newApptCustomerIDTxt.setText("");
-        newApptUserIDTxt.setText("");
-        newApptStartTimeTxt.setText("");
-        newApptEndTimeTxt.setText("");
-        newApptStartDate.getEditor().clear();
-        newApptEndDate.getEditor().clear();
 
     }
 
@@ -501,7 +530,8 @@ public class DashboardController implements Initializable {
             ResultSet populateAppointmentsTable = appointmentsQuery.select();
 
 
-            System.out.println(allAppointmentsTableView.getItems().size());
+            //
+            //System.out.println(allAppointmentsTableView.getItems().size());
 
             if (allAppointmentsTableView.getColumns() != null){
                 allAppointmentsTableView.getColumns().clear();
@@ -665,8 +695,9 @@ public class DashboardController implements Initializable {
         }
     }
 
-    public void sendLoggedInUser(String username){
+    public void sendLoggedInUser(String username, long loginTime){
         this.loggedInUser = username;
+        this.loginTime = loginTime;
     }
 
     public int getDivisionID(String divisionName) throws SQLException {
@@ -759,6 +790,8 @@ public class DashboardController implements Initializable {
         ZonedDateTime zdt = ldt.atZone(z);
         ZonedDateTime utc = zdt.withZoneSameInstant(ZoneId.of("UTC"));
         DateTimeFormatter customFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        //System.out.println("Now printing the integer: " + Integer.parseInt(actualTime[0]) + " Complete.");
         return customFormat.format(utc);
 
     }
@@ -778,6 +811,20 @@ public class DashboardController implements Initializable {
 
         return customFormat.format(zdt);
     }
+    public String convertToET(String date) throws ParseException {
+        String[] actualDate = date.split("\\s+");
+        String[] actualTime = actualDate[1].split(":");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date date1 = sdf.parse(actualDate[0]);
+        LocalDate date2 = date1.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDateTime ldt = LocalDateTime.of(date2.getYear(), date2.getMonth(), date2.getDayOfMonth(), Integer.parseInt(actualTime[0]), Integer.parseInt(actualTime[1]), Integer.parseInt(actualTime[2]));
+        OffsetDateTime odt = ldt.atOffset(ZoneOffset.UTC);
+        ZoneId z = ZoneId.of("America/New_York");
+        ZonedDateTime zdt = odt.atZoneSameInstant(z);
+        DateTimeFormatter customFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        return customFormat.format(zdt);
+    }
 
     public void alertError(String message){
         Alert alert = new Alert(Alert.AlertType.ERROR, message);
@@ -787,5 +834,118 @@ public class DashboardController implements Initializable {
     public void alertSuccessful(String message){
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, message);
         alert.show();
+    }
+
+    public boolean appointmentTimeVerification(String startDateTimeUTC, String endDateTimeUTC) throws ParseException {
+
+        String startDateTime = convertToET(startDateTimeUTC);
+        String endDateTime = convertToET(endDateTimeUTC);
+
+        String[] actualStartDate = startDateTime.split("\\s+");
+        String[] actualStartTime = actualStartDate[1].split(":");
+
+        String[] actualEndDate = endDateTime.split("\\s+");
+        String[] actualEndTime = actualEndDate[1].split(":");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        Date startDate = sdf.parse(actualStartDate[0]);
+        Date endDate = sdf.parse(actualEndDate[0]);
+        
+        if (startDate.compareTo(endDate) == 0){
+        } else if (startDate.compareTo(endDate) > 0) {
+            alertError("Error, the start date can not occur after the end date");
+            return false;
+        }else {
+            alertError("Error, the end date can not occur after the start date. They must be on the same date");
+            return false;
+        }
+
+        //System.out.println(actualStartTime[0]);
+        //System.out.println(actualEndTime[0]);
+
+        if (Integer.parseInt(actualStartTime[0]) < 8 || (Integer.parseInt(actualStartTime[0]) == 22 && Integer.parseInt(actualStartTime[1]) > 0 || Integer.parseInt(actualStartTime[2]) > 0) || Integer.parseInt(actualStartTime[0]) > 22){
+            alertError("Error, you cannot start an appointment outside of business hours");
+            return false;
+        } else if (Integer.parseInt(actualEndTime[0]) < 8 || (Integer.parseInt(actualEndTime[0]) == 22 && Integer.parseInt(actualEndTime[1]) > 0 || Integer.parseInt(actualEndTime[2]) > 0) || Integer.parseInt(actualEndTime[0]) > 22) {
+            alertError("Error, you cannot end an appointment outside of business hours");
+            return false;
+        } else if (Integer.parseInt(actualStartTime[0]) > Integer.parseInt(actualEndTime[0])) {
+            alertError("Error, you cannot end an appointment prior to its start time");
+            return false;
+        }
+        return true;
+    }
+
+    public boolean overlappingAppointmentsCheck(ResultSet rs, String start, String end, int apptID) throws SQLException, ParseException {
+
+        //String startDateTimes[] = null;
+        ArrayList<String> startDateTimes = new ArrayList<String>();
+        //String endDateTimes[] = null;
+        ArrayList<String> endDateTimes = new ArrayList<String>();
+        int j = 0;
+        boolean check1 = false;
+        boolean check2 = false;
+
+        while (rs.next()){
+            if (apptID != rs.getInt("Appointment_ID")){
+                startDateTimes.add(rs.getString("Start"));
+                endDateTimes.add(rs.getString("End"));
+            }
+        }
+
+        if (startDateTimes.size() > 0){
+
+            /*ArrayList<String> actualStartDate = new ArrayList<String>();
+            ArrayList<String> actualStartTime = new ArrayList<String>();
+            ArrayList<String> actualEndDate = new ArrayList<String>();
+            ArrayList<String> actualEndTime = new ArrayList<String>();
+
+            for (String s: startDateTimes){
+                String[] temp = s.split("\\s+");
+                actualStartDate.add(temp[0]);
+                actualStartTime.add(temp[1]);
+
+            }
+
+            for (String s: endDateTimes){
+                String[] temp = s.split("\\s+");
+                actualEndDate.add(temp[0]);
+                actualEndTime.add(temp[1]);
+            }*/
+
+            for (String s: startDateTimes){
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                //System.out.println(s);
+                Date startTimeLocated = sdf.parse(s);
+                Date providedEndTime = sdf.parse(end);
+                //System.out.println("START TIME    " + startTimeLocated + "     END");
+                //System.out.println("END TIME    " + providedEndTime + "     END");
+
+                if (startTimeLocated.before(providedEndTime)){
+                    check1 = true;
+                }
+            }
+            for (String s: endDateTimes){
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date endTimeLocated = sdf.parse(s);
+                Date providedStartTime = sdf.parse(start);
+                //System.out.println("END TIME    " + endTimeLocated + "     END");
+
+                if (providedStartTime.before(endTimeLocated)){
+                    check2 = true;
+                }
+            }
+        }
+
+        if (check1 && check2){
+            alertError("Error, you cannot overlap appointment times for a single customer.");
+            return true;
+        }
+        return false;
+    }
+
+    public void checkForUpcomingAppointments(){
+        final int FIFTEEN = 15 * 60 * 1000;
     }
 }

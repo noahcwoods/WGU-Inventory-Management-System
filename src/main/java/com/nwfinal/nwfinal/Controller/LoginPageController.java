@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.util.Locale;
 import java.util.Objects;
@@ -59,6 +60,8 @@ public class LoginPageController implements Initializable {
 
         String userName = userLoginTxt.getText();
         String password = userPasswordTxt.getText();
+        long loginTime = System.currentTimeMillis();
+        System.out.println(loginTime);
 
         JDBC.openConnection();
         boolean authenticationCheck = usersQuery.select(userName, password);
@@ -73,7 +76,7 @@ public class LoginPageController implements Initializable {
 
             DashboardController controller = loader.getController();
 
-            controller.sendLoggedInUser(userName);
+            controller.sendLoggedInUser(userName, loginTime);
 
             stage = ((Stage) ((Button) event.getSource()).getScene().getWindow());
             scene = loader.getRoot();
@@ -89,7 +92,7 @@ public class LoginPageController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        ZoneId.getAvailableZoneIds().stream().sorted().forEach(System.out::println);
+        //ZoneId.getAvailableZoneIds().stream().sorted().forEach(System.out::println);
 
 
         ZoneId z = ZoneId.systemDefault();
@@ -102,9 +105,6 @@ public class LoginPageController implements Initializable {
         passwordLbl.setText(rb.getString("password"));
         zoneIDTextLbl.setText(rb.getString("zoneid"));
         loginBtn.setText(rb.getString("login"));
-
-
-
 
     }
 }
