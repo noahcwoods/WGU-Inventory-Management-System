@@ -244,7 +244,7 @@ public class DashboardController implements Initializable {
         existingCustomerStateCombo.setItems(getStateOptions(countryName));
     }
     @FXML
-    void customerSelectedFromViewClick(MouseEvent event) throws SQLException {
+    void customerSelectedFromViewClick(MouseEvent event) throws Exception {
 
         ObservableList<Object> obj = FXCollections.observableArrayList(allCustomersTableView.getSelectionModel().getSelectedItem());
 
@@ -277,7 +277,7 @@ public class DashboardController implements Initializable {
         }
 
         ResultSet associatedAppointments = appointmentsQuery.select(customerID);
-        //buildData(associatedAppointments, existingCustomerAssociatedAppointmentsTableView, filteredAppointments);
+        buildDataAppt(associatedAppointments, existingCustomerAssociatedAppointmentsTableView, filteredAppointments);
 
     }
 
@@ -286,9 +286,19 @@ public class DashboardController implements Initializable {
 
         int customerID = Integer.parseInt(existingCustomerIDTxt.getText());
 
-        customersQuery.delete(customerID);
-        updateAllTables();
-        toggleEdit();
+        ResultSet rs = appointmentsQuery.select(customerID);
+        if (rs.next() == false){
+            customersQuery.delete(customerID);
+            String deleteMessage = existingCustomerNameTxt.getText() + " has been deleted!";
+            alertSuccessful(deleteMessage);
+            updateAllTables();
+            toggleEdit();
+
+        }else {
+            alertError("Cannot Delete Customers with Appointments Associated");
+        }
+
+
 
     }
 
@@ -317,6 +327,11 @@ public class DashboardController implements Initializable {
         int apptID = Integer.parseInt(existingApptIDTxt.getText());
 
         appointmentsQuery.delete(apptID);
+        String message = "Appointment ID: " + existingApptIDTxt.getText() + "\n"
+                + "Appointment Type: " + existingApptTypeTxt.getText() + "\n" +
+                "This appointment has been cancelled successfully ";
+        alertSuccessful(message);
+
         updateAllTables();
         toggleApptEdit();
     }
@@ -762,5 +777,15 @@ public class DashboardController implements Initializable {
         DateTimeFormatter customFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         return customFormat.format(zdt);
+    }
+
+    public void alertError(String message){
+        Alert alert = new Alert(Alert.AlertType.ERROR, message);
+        alert.show();
+    }
+
+    public void alertSuccessful(String message){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, message);
+        alert.show();
     }
 }
