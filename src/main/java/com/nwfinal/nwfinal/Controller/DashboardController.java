@@ -25,6 +25,7 @@ import java.util.*;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import java.sql.ResultSet;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -51,7 +52,7 @@ public class DashboardController implements Initializable {
     private ObservableList<String> stateOptions = FXCollections.observableArrayList();
     private ObservableList<String> contactOptions = FXCollections.observableArrayList();
     private String loggedInUser;
-    private long loginTime;
+    private ZonedDateTime loginTime;
 
     @FXML
     private TextField existingApptEndTimeTxt;
@@ -695,9 +696,19 @@ public class DashboardController implements Initializable {
         }
     }
 
-    public void sendLoggedInUser(String username, long loginTime){
+    public void sendLoggedInUser(String username, ZonedDateTime loginTime){
         this.loggedInUser = username;
         this.loginTime = loginTime;
+
+        try {
+            ResultSet rs = appointmentsQuery.select();
+            checkForUpcomingAppointments(rs);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public int getDivisionID(String divisionName) throws SQLException {
@@ -945,7 +956,32 @@ public class DashboardController implements Initializable {
         return false;
     }
 
-    public void checkForUpcomingAppointments(){
-        final int FIFTEEN = 15 * 60 * 1000;
+    public void checkForUpcomingAppointments(ResultSet allAppointments) throws SQLException, ParseException {
+
+        ArrayList<Date> allAppointmentDates = new ArrayList<>();
+
+        while (allAppointments.next()){
+            String tempdate = allAppointments.getString("Start");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date tempDateConverted = sdf.parse(tempdate);
+            allAppointmentDates.add(tempDateConverted);
+        }
+
+        String loginTimeUTCString = convertToUTC(loginTime.toString());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date loginTimeUTC = sdf.parse(loginTimeUTCString);
+
+        System.out.println("checked date login = " + loginTimeUTC);
+        System.out.println("Checked date list = " + allAppointmentDates);
+
+        for (Date d: allAppointmentDates){
+            long dateNow = 012312; //loginTime.ofInstant(Instant.ofEpochMilli(m), ZoneId.systemDefault());
+            long dateCompare = d.getTime();
+
+            if (Math.abs(dateCompare - dateNow) < TimeUnit.MINUTES.toMillis(15)){
+                Alert alert = new Alert(Alert.AlertType.WARNING, "You have an upcoming appointment within 15 minutes of now!");
+                alert.show();
+            }
+        }
     }
 }

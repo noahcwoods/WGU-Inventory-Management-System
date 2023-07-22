@@ -18,10 +18,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.ResourceBundle;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 import static javafx.fxml.FXMLLoader.*;
 
@@ -56,12 +60,15 @@ public class LoginPageController implements Initializable {
 
 
     @FXML
-    void onActionClickLoginBtn(ActionEvent event) throws SQLException, IOException {
+    void onActionClickLoginBtn(ActionEvent event) throws SQLException, IOException, ParseException {
 
         String userName = userLoginTxt.getText();
         String password = userPasswordTxt.getText();
-        long loginTime = System.currentTimeMillis();
-        System.out.println(loginTime);
+        ZoneId z = ZoneId.systemDefault();
+        LocalDateTime ldt = LocalDateTime.now();
+        ZonedDateTime zdt = ldt.atZone(z);
+        ZonedDateTime loginTime = zdt.withZoneSameInstant(ZoneId.of("UTC"));
+        //DateTimeFormatter dtf = DateTimeFormatter.ofPattern("YYYY-mm-dd HH:mm:ss");
 
         JDBC.openConnection();
         boolean authenticationCheck = usersQuery.select(userName, password);
