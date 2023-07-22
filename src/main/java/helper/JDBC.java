@@ -2,6 +2,9 @@ package helper;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
+/**
+ * Creates the connections to the database and ends them
+ */
 public abstract class JDBC{
 
     private static final String protocol = "jdbc";
@@ -14,6 +17,9 @@ public abstract class JDBC{
     private static String password = "Passw0rd!"; // Password
     public static Connection connection;  // Connection Interface
 
+    /**
+     * Starts database connection
+     */
     public static void openConnection()
     {
         try {
@@ -27,6 +33,9 @@ public abstract class JDBC{
         }
     }
 
+    /**
+     * Ends database connection
+     */
     public static void closeConnection() {
         try {
             connection.close();

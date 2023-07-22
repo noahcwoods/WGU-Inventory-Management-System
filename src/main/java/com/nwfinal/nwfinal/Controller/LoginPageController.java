@@ -26,39 +26,55 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import static javafx.fxml.FXMLLoader.*;
 
 public class LoginPageController implements Initializable {
 
     ResourceBundle rb = ResourceBundle.getBundle("rb");
-
-    @FXML
-    private Button loginBtn;
-
-    @FXML
-    private Label passwordLbl;
-
-    @FXML
-    private Label zoneIDTextLbl;
-
-    @FXML
-    private Label usernameLbl;
-
     Stage stage;
     Parent scene;
 
+    /** GUI interface item */
+    @FXML
+    private Button loginBtn;
 
+    /** GUI interface item */
+    @FXML
+    private Label passwordLbl;
+
+    /** GUI interface item */
+    @FXML
+    private Label zoneIDTextLbl;
+
+    /** GUI interface item */
+    @FXML
+    private Label usernameLbl;
+
+    /** GUI interface item */
     @FXML
     private TextField userLoginTxt;
 
+    /** GUI interface item */
     @FXML
     private TextField userPasswordTxt;
 
+    /** GUI interface item */
     @FXML
     private Label zoneIDLbl;
 
 
+    /**
+     * Checks users input against database and makes sure the user entered correct information
+     * @param event
+     * @throws SQLException
+     * @throws IOException
+     * @throws ParseException
+     */
     @FXML
     void onActionClickLoginBtn(ActionEvent event) throws SQLException, IOException, ParseException {
 
@@ -68,14 +84,31 @@ public class LoginPageController implements Initializable {
         LocalDateTime ldt = LocalDateTime.now();
         ZonedDateTime zdt = ldt.atZone(z);
         ZonedDateTime loginTime = zdt.withZoneSameInstant(ZoneId.of("UTC"));
+        long loginTimeMilli = loginTime.toInstant().toEpochMilli();
         //DateTimeFormatter dtf = DateTimeFormatter.ofPattern("YYYY-mm-dd HH:mm:ss");
+        Logger log = Logger.getLogger("login_activity.txt");
+
+        try{
+            FileHandler handle = new FileHandler("login_activity.txt", true);
+            SimpleFormatter simple = new SimpleFormatter();
+            handle.setFormatter(simple);
+            log.addHandler(handle);
+        }catch (IOException ex){
+            Logger.getLogger(LoginPageController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+
+        Date test = new Date(loginTimeMilli);
+
+        //System.out.println(test + "THIS IS THE DATE AFTER CONVERSION FROM MILLI");
 
         JDBC.openConnection();
         boolean authenticationCheck = usersQuery.select(userName, password);
-        System.out.println(authenticationCheck);
         JDBC.closeConnection();
 
         if (authenticationCheck) {
+
+            log.severe("NEW SUCCESSFUL LOGIN FROM USER: " + userName);
 
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/com/nwfinal/nwfinal/dashboard.fxml"));
@@ -83,7 +116,7 @@ public class LoginPageController implements Initializable {
 
             DashboardController controller = loader.getController();
 
-            controller.sendLoggedInUser(userName, loginTime);
+            controller.sendLoggedInUser(userName, loginTimeMilli);
 
             stage = ((Stage) ((Button) event.getSource()).getScene().getWindow());
             scene = loader.getRoot();
@@ -91,11 +124,17 @@ public class LoginPageController implements Initializable {
             stage.show();
 
         }else {
+            log.severe("NEW LOGIN ATTEMPT FAILED FROM USER: " + userName);
             Alert alert = new Alert(Alert.AlertType.ERROR, rb.getString("alert"));
             alert.show();
         }
     }
 
+    /**
+     * French or English conversion based on user's computer settings
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 

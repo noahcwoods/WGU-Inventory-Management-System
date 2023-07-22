@@ -16,6 +16,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 import java.net.URL;
 import java.sql.*;
+import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
@@ -43,151 +44,347 @@ import javafx.stage.WindowEvent;
 
 import javax.xml.stream.events.EndDocument;
 
+/**
+ * Dashboard contains all aspects of the application except the initial login page. This handles all reporting, customer viewing/adding/deleting, appointment viewing/adding/deleting.
+ */
 public class DashboardController implements Initializable {
 
     private ObservableList<ObservableList> allCustomers;
     private ObservableList<ObservableList> allAppointments;
     private ObservableList<ObservableList> filteredAppointments;
+    private ObservableList<ObservableList> contactAppointments;
     private ObservableList<String> countryOptions = FXCollections.observableArrayList();
     private ObservableList<String> stateOptions = FXCollections.observableArrayList();
     private ObservableList<String> contactOptions = FXCollections.observableArrayList();
+    private ObservableList<String> appointmentTypes = FXCollections.observableArrayList();
+    private ObservableList<String> months = FXCollections.observableArrayList();
+    private ObservableList<String> allUsers = FXCollections.observableArrayList();
     private String loggedInUser;
-    private ZonedDateTime loginTime;
+    private long loginTime;
 
+
+    /** GUI interface item */
+    @FXML
+    private ComboBox<String> appointmentsByContactCombo;
+
+    /** GUI interface item */
+    @FXML
+    private TableView appointmentsByContactTableView;
+
+    /** GUI interface item */
+    @FXML
+    private ComboBox<String> appointmentsByMonthCombo;
+
+    /** GUI interface item */
+    @FXML
+    private ComboBox<String> appointmentsByTypeCombo;
+
+    /** GUI interface item */
+    @FXML
+    private TextField appointmentsByTypeOutputTxt;
+
+    /** GUI interface item */
+    @FXML
+    private ComboBox<String> appointmentsByUserCombo;
+
+    /** GUI interface item */
+    @FXML
+    private TextField appointmentsByUserOutput;
+
+    /** GUI interface item */
+    @FXML
+    private RadioButton allAppointmentsRBtn;
+
+    /** GUI interface item */
+    @FXML
+    private RadioButton weekAppointmentsRBtn;
+
+    /** GUI interface item */
+    @FXML
+    private RadioButton monthAppointmentsRbtn;
+
+    /** GUI interface item */
     @FXML
     private TextField existingApptEndTimeTxt;
+
+    /** GUI interface item */
     @FXML
     private TextField existingApptStartTimeTxt;
+
+    /** GUI interface item */
     @FXML
     private TextField newApptEndTimeTxt;
+
+    /** GUI interface item */
     @FXML
     private TextField newApptStartTimeTxt;
+
+    /** GUI interface item */
     @FXML
     private Button saveExistingCustomersBtn;
+
+    /** GUI interface item */
     @FXML
     private Button existingApptSaveBtn;
+
+    /** GUI interface item */
     @FXML
     private Button existingApptEditBtn;
+
+    /** GUI interface item */
     @FXML
     private Button existingApptDeleteBtn;
+
+    /** GUI interface item */
     @FXML
     private Button deleteExistingCustomerBtn;
 
+    /** GUI interface item */
     @FXML
     private Button editExistingCustomerBtn;
 
+    /** GUI interface item */
     @FXML
     private TextField ExistingApptUserIDTxt;
 
+    /** GUI interface item */
     @FXML
     private TableView allAppointmentsTableView;
 
+    /** GUI interface item */
     @FXML
     private TableView allCustomersTableView;
 
+    /** GUI interface item */
     @FXML
     private ComboBox<String> existingApptContactCombo;
 
+    /** GUI interface item */
     @FXML
     private TextField existingApptCustomerIDTxt;
 
+    /** GUI interface item */
     @FXML
     private TextArea existingApptDescTxt;
 
+    /** GUI interface item */
     @FXML
     private TextField existingApptEndDate;
 
+    /** GUI interface item */
     @FXML
     private TextField existingApptIDTxt;
 
+    /** GUI interface item */
     @FXML
     private TextField existingApptLocationTxt;
 
+    /** GUI interface item */
     @FXML
     private TextField existingApptStartDate;
 
+    /** GUI interface item */
     @FXML
     private TextField existingApptTitleTxt;
 
+    /** GUI interface item */
     @FXML
     private TextField existingApptTypeTxt;
 
+    /** GUI interface item */
     @FXML
     private TextField existingCustomerAddressTxt;
 
+    /** GUI interface item */
     @FXML
     private TableView<?> existingCustomerAssociatedAppointmentsTableView;
 
+    /** GUI interface item */
     @FXML
     private ComboBox<String> existingCustomerCountryCombo;
 
+    /** GUI interface item */
     @FXML
     private TextField existingCustomerIDTxt;
 
+    /** GUI interface item */
     @FXML
     private TextField existingCustomerNameTxt;
 
+    /** GUI interface item */
     @FXML
     private TextField existingCustomerPhoneTxt;
 
+    /** GUI interface item */
     @FXML
     private ComboBox<String> existingCustomerStateCombo;
 
+    /** GUI interface item */
     @FXML
     private TextField existingCustomerZipTxt;
 
+    /** GUI interface item */
     @FXML
     private ComboBox<String> newApptContactCombo;
 
+    /** GUI interface item */
     @FXML
     private TextField newApptCustomerIDTxt;
 
+    /** GUI interface item */
     @FXML
     private TextArea newApptDescTxt;
 
+    /** GUI interface item */
     @FXML
     private DatePicker newApptEndDate;
 
+    /** GUI interface item */
     @FXML
     private TextField newApptID;
 
+    /** GUI interface item */
     @FXML
     private TextField newApptLocationTxt;
 
+    /** GUI interface item */
     @FXML
     private DatePicker newApptStartDate;
 
+    /** GUI interface item */
     @FXML
     private TextField newApptTitleTxt;
 
+    /** GUI interface item */
     @FXML
     private TextField newApptTypeTxt;
 
+    /** GUI interface item */
     @FXML
     private TextField newApptUserIDTxt;
 
+    /** GUI interface item */
     @FXML
     private TextField newCustomerAddressTxt;
 
+    /** GUI interface item */
     @FXML
     private ComboBox<String> newCustomerCountryCombo;
 
+    /** GUI interface item */
     @FXML
     private TextField newCustomerNameTxt;
 
+    /** GUI interface item */
     @FXML
     private TextField newCustomerPhoneTxt;
 
+    /** GUI interface item */
     @FXML
     private ComboBox<String> newCustomerStateCombo;
 
+    /** GUI interface item */
     @FXML
     private TextField newCustomerZipTxt;
 
+    /**
+     * Takes in a selected contact and displays all appointments associated to that contact
+     * @param event
+     * @throws Exception
+     */
+    @FXML
+    void appointmentsByContactBtn(ActionEvent event) throws Exception {
+        String selectedContact = appointmentsByContactCombo.getValue();
+        ResultSet rs = contactsQuery.select(selectedContact);
+        int contactID = -1;
+        while (rs.next()){
+            contactID = rs.getInt("Contact_ID");
+        }
+
+        ResultSet rs2 =  appointmentsQuery.selectByContact(contactID);
+
+        if (contactAppointments != null){
+            contactAppointments.clear();
+        }
+        buildDataAppt(rs2, appointmentsByContactTableView, contactAppointments);
+
+    }
+
+    /**
+     * Takes in Type and Month inputs from user and displays the number of appointments in the given month with the given type
+     * @param event
+     * @throws SQLException
+     */
+    @FXML
+    void appointmentsByTypeBtn(ActionEvent event) throws SQLException {
+        String selectedType = appointmentsByTypeCombo.getValue();
+        String selectedMonth = appointmentsByMonthCombo.getValue();
+        int count = 0;
+
+        ResultSet rs = appointmentsQuery.selectByTypeMonth(selectedMonth, selectedType);
+
+        while (rs.next()){
+            count++;
+        }
+
+        appointmentsByTypeOutputTxt.setText(String.valueOf(count));
+    }
+
+    /**
+     * Takes in the requested user and displays the number of appointments that have been created by that user. NOTE: This does not display based on which user was assigned to that appointment. It only shows who created it.
+     * @param event
+     * @throws SQLException
+     */
+    @FXML
+    void appointmentsByUserBtn(ActionEvent event) throws SQLException {
+        String selectedUser = appointmentsByUserCombo.getValue();
+        int count = 0;
+
+        ResultSet rs = appointmentsQuery.selectByUser(selectedUser);
+        while (rs.next()){
+            count++;
+        }
+        appointmentsByUserOutput.setText(String.valueOf(count));
+    }
+
+    /**
+     * Filters the main appointments view to show ALL appointments
+     * */
+    @FXML
+    void allAppointmentsRBtnClick(MouseEvent event) {
+        updateAllTables();
+    }
+
+    /**
+     * Filters the main appointments view to show all appointments in a given WEEK
+     * */
+    @FXML
+    void weekAppointmentsRBtnClick(MouseEvent event) {
+        updateAllTables();
+    }
+
+    /**
+     * Filters the main appointments view to show all appointments in a given MONTH
+     * */
+    @FXML
+    void monthAppointmentsRbtnClick(MouseEvent event) {
+        updateAllTables();
+    }
+
+    /**
+     * Empty, may be needed for future functionality
+     * */
     @FXML
     void newCustomerStateCombo(ActionEvent event) {
 
     }
+
+    /**
+     * Displays detailed appointment information on the left side of the user interface given the clicked on item.
+     * @param event
+     * @throws SQLException
+     * @throws ParseException
+     */
     @FXML
     void allApptSelectedClick(MouseEvent event) throws SQLException, ParseException {
 
@@ -235,19 +432,42 @@ public class DashboardController implements Initializable {
         }
 
     }
+
+    /**
+     * Once country is selected by user, this sets the STATE combo with the appropriate states / provinces
+     * @param event
+     * @throws SQLException
+     */
     @FXML
     void newCustomerCountryCombo(ActionEvent event) throws SQLException {
         String countryName = newCustomerCountryCombo.getSelectionModel().getSelectedItem();
         newCustomerStateCombo.setItems(getStateOptions(countryName));
     }
+
+    /**
+     * Not used. May be needed for future functionality
+     * @param event
+     */
     @FXML
     void existingCustomerStateCombo(ActionEvent event) {
     }
+
+    /**
+     * Once country is selected by user, this sets the STATE combo with the appropriate states / provinces
+     * @param event
+     * @throws SQLException
+     */
     @FXML
     void existingCustomerCountryCombo(ActionEvent event) throws SQLException {
         String countryName = existingCustomerCountryCombo.getSelectionModel().getSelectedItem();
         existingCustomerStateCombo.setItems(getStateOptions(countryName));
     }
+
+    /**
+     * Displays detailed customer information on the left side of the user interface given the clicked on item
+     * @param event
+     * @throws Exception
+     */
     @FXML
     void customerSelectedFromViewClick(MouseEvent event) throws Exception {
 
@@ -297,6 +517,11 @@ public class DashboardController implements Initializable {
 
     }
 
+    /**
+     * Deletes the requested customer provided there are no associated appointments
+     * @param event
+     * @throws SQLException
+     */
     @FXML
     void deleteExistingCustomerBtn(ActionEvent event) throws SQLException {
 
@@ -318,6 +543,11 @@ public class DashboardController implements Initializable {
 
     }
 
+    /**
+     * Enables fields to edit the existing customer. If this has already been selected, changes to 'Cancel' and upon second click, disables ability to edit fields and cancels any edits already made.
+     * @param event
+     * @throws SQLException
+     */
     @FXML
     void editExistingCustomerBtn(ActionEvent event) throws SQLException {
 
@@ -338,6 +568,11 @@ public class DashboardController implements Initializable {
 
     }
 
+    /**
+     * Deletes the specified appointment
+     * @param event
+     * @throws SQLException
+     */
     @FXML
     void existingApptDeleteBtn(ActionEvent event) throws SQLException {
         int apptID = Integer.parseInt(existingApptIDTxt.getText());
@@ -352,6 +587,10 @@ public class DashboardController implements Initializable {
         toggleApptEdit();
     }
 
+    /**
+     * Enables editable fields for the appointment selected. If this has already been clicked for editing, switches to 'Cancel' and upon second click disables ability to edit fields and cancels edits made already.w
+     * @param event
+     */
     @FXML
     void existingApptEditBtn(ActionEvent event) {
         if (Objects.equals(existingApptEditBtn.getText(), "Cancel")){
@@ -377,6 +616,12 @@ public class DashboardController implements Initializable {
         }
     }
 
+    /**
+     * Saves edits made to an existing appointment provided those edits meet criteria for overlapping appointments
+     * @param event
+     * @throws SQLException
+     * @throws ParseException
+     */
     @FXML
     void existingApptSaveBtn(ActionEvent event) throws SQLException, ParseException {
         int apptID = Integer.parseInt(existingApptIDTxt.getText());
@@ -405,7 +650,7 @@ public class DashboardController implements Initializable {
 
         String start = startDateTime.toString();
         String end = endDateTime.toString();
-        ResultSet overlap = appointmentsQuery.select(customerID);
+        ResultSet overlap = appointmentsQuery.selectToday(customerID);
 
         if (appointmentTimeVerification(startDateTime, endDateTime) && !overlappingAppointmentsCheck(overlap, start, end, apptID)){
             appointmentsQuery.update(apptID, apptTitle, apptDesc, apptLocation, apptType, startDateTime, endDateTime, lastUpdateDate, lastUpdatedBy, customerID, userID, contactID);
@@ -414,6 +659,12 @@ public class DashboardController implements Initializable {
         }
     }
 
+    /**
+     * Creates new appointment provided it meets the specified criteria for overlapping appointments
+     * @param event
+     * @throws SQLException
+     * @throws ParseException
+     */
     @FXML
     void newApptCreateBtn(ActionEvent event) throws SQLException, ParseException {
         String apptTitle = newApptTitleTxt.getText();
@@ -444,7 +695,7 @@ public class DashboardController implements Initializable {
         String start = startDateTime.toString();
         String end = endDateTime.toString();
 
-        ResultSet verifyApptOverlap = appointmentsQuery.select(customerID);
+        ResultSet verifyApptOverlap = appointmentsQuery.selectToday(customerID);
         //boolean test = overlappingAppointmentsCheck(verifyApptOverlap, start, end);
         //System.out.println(test);
 
@@ -461,14 +712,19 @@ public class DashboardController implements Initializable {
             newApptUserIDTxt.setText("");
             newApptStartTimeTxt.setText("");
             newApptEndTimeTxt.setText("");
-            newApptStartDate.getEditor().clear();
-            newApptEndDate.getEditor().clear();
+            newApptStartDate.setValue(LocalDate.now());
+            newApptEndDate.setValue(LocalDate.now());
 
         }
 
 
     }
 
+    /**
+     * Creates a new customer
+     * @param event
+     * @throws SQLException
+     */
     @FXML
     void newCustomerCreateBtn(ActionEvent event) throws SQLException {
 
@@ -496,6 +752,11 @@ public class DashboardController implements Initializable {
 
     }
 
+    /**
+     * Saves changes made to existing customer
+     * @param event
+     * @throws SQLException
+     */
     @FXML
     void saveExistingCustomerBtn(ActionEvent event) throws SQLException {
 
@@ -517,18 +778,33 @@ public class DashboardController implements Initializable {
 
     }
 
+    /**
+     * Starts database connection. Populates all tables in the view
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
         JDBC.openConnection();
         updateAllTables();
 
+
+
     }
 
+    /**
+     * Clears tables if they are already populated, calls the methods to update the tables with new information. Used across the application to update changes made to appointments and customers.
+     * LAMBDA expressions contained here!
+     * Two are used, one for countries combos and one for contact combos. The expressions are used to grab each item from a List and add it to the combo box for the user.
+     * The alternative would be a classic style for loop iterating through the list and adding one by one.
+     */
     public void updateAllTables(){
         try {
             ResultSet populateCustomersTable = customersQuery.select();
-            ResultSet populateAppointmentsTable = appointmentsQuery.select();
+
+
+            //ResultSet populateAppointmentsTable = appointmentsQuery.select();
 
 
             //
@@ -556,10 +832,33 @@ public class DashboardController implements Initializable {
             if (contactOptions != null){
                 contactOptions.clear();
             }
+            if (appointmentTypes != null){
+                appointmentTypes.clear();
+            }
+            if (months != null){
+                months.clear();
+            }
+            if (allUsers != null){
+                allUsers.clear();
+            }
+
             //System.out.println(allAppointments);
 
             buildData(populateCustomersTable, allCustomersTableView, allCustomers);
-            buildDataAppt(populateAppointmentsTable, allAppointmentsTableView, allAppointments);
+
+
+            //buildDataAppt(populateAppointmentsTable, allAppointmentsTableView, allAppointments);
+
+            if (allAppointmentsRBtn.isSelected()){
+                ResultSet populateAppointmentsTable = appointmentsQuery.select();
+                buildDataAppt(populateAppointmentsTable, allAppointmentsTableView, allAppointments);
+            }else if (monthAppointmentsRbtn.isSelected()){
+                ResultSet populateAppointmentsTable = appointmentsQuery.selectMonth();
+                buildDataAppt(populateAppointmentsTable, allAppointmentsTableView, allAppointments);
+            }else {
+                ResultSet populateAppointmentsTable = appointmentsQuery.selectWeek();
+                buildDataAppt(populateAppointmentsTable, allAppointmentsTableView, allAppointments);
+            }
 
 
             ResultSet populateCountriesCombo = countriesQuery.select();
@@ -576,10 +875,38 @@ public class DashboardController implements Initializable {
                 contactOptions.add(temp);
             }
 
-            newCustomerCountryCombo.setItems(countryOptions);
-            existingCustomerCountryCombo.setItems(countryOptions);
-            newApptContactCombo.setItems(contactOptions);
-            existingApptContactCombo.setItems(contactOptions);
+            newApptContactCombo.getItems().clear();
+            newCustomerCountryCombo.getItems().clear();
+            appointmentsByContactCombo.getItems().clear();
+            existingCustomerCountryCombo.getItems().clear();
+
+
+            contactOptions.forEach((s) -> { newApptContactCombo.getItems().add(s); appointmentsByContactCombo.getItems().add(s); } );
+            countryOptions.forEach((s) -> { newCustomerCountryCombo.getItems().add(s); existingCustomerCountryCombo.getItems().add(s); } );
+
+            DateFormatSymbols dfs = new DateFormatSymbols();
+            String[] Months = dfs.getMonths();
+            for (String m: Months){
+                months.add(m);
+            }
+            appointmentsByMonthCombo.setItems(months);
+
+            ResultSet appointmentTypes = appointmentsQuery.selectTypes();
+
+            while (appointmentTypes.next()){
+                this.appointmentTypes.add(appointmentTypes.getString("Type"));
+            }
+
+            appointmentsByTypeCombo.setItems(this.appointmentTypes);
+
+            ResultSet allUsers = usersQuery.select();
+            while (allUsers.next()){
+                this.allUsers.add(allUsers.getString("User_Name"));
+            }
+            appointmentsByUserCombo.setItems(this.allUsers);
+
+
+
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -588,6 +915,13 @@ public class DashboardController implements Initializable {
         }
     }
 
+    /**
+     * Takes an empty tableview, uses the database to grab and create table columns, then populates the rows. Takes the row data and parses out the date/time fields to convert to local time.
+     * @param rs
+     * @param tb
+     * @param list
+     * @throws Exception
+     */
     public void buildData(ResultSet rs, TableView tb, ObservableList<ObservableList> list)throws Exception{
 
         list = FXCollections.observableArrayList();
@@ -644,6 +978,13 @@ public class DashboardController implements Initializable {
         }
     }
 
+    /**
+     * Takes and empty tableview for appointments, then populates the columns and rows. Parses out the date/time fields to convert them to local time before displaying
+     * @param rs
+     * @param tb
+     * @param list
+     * @throws Exception
+     */
     public void buildDataAppt(ResultSet rs, TableView tb, ObservableList<ObservableList> list)throws Exception{
 
         list = FXCollections.observableArrayList();
@@ -696,7 +1037,12 @@ public class DashboardController implements Initializable {
         }
     }
 
-    public void sendLoggedInUser(String username, ZonedDateTime loginTime){
+    /**
+     * Gets the logged in user information from the login screen. Also grabs the loginTime field for later user in the application.
+     * @param username
+     * @param loginTime
+     */
+    public void sendLoggedInUser(String username, long loginTime){
         this.loggedInUser = username;
         this.loginTime = loginTime;
 
@@ -711,6 +1057,12 @@ public class DashboardController implements Initializable {
         }
     }
 
+    /**
+     * Takes a division name (such as Pennsylvania) and queries the database for the ID to be used in other parts of the application
+     * @param divisionName
+     * @return
+     * @throws SQLException
+     */
     public int getDivisionID(String divisionName) throws SQLException {
         int divisionID = -1;
         ResultSet getDivisionID = firstLevelDivisionsQuery.select(divisionName);
@@ -720,6 +1072,12 @@ public class DashboardController implements Initializable {
         return divisionID;
     }
 
+    /**
+     * Takes in the country name specified by the user and returns all the applicable state options
+     * @param countryName
+     * @return
+     * @throws SQLException
+     */
     public ObservableList<String> getStateOptions(String countryName) throws SQLException {
         int countryID = -1;
         ResultSet getCountryID = countriesQuery.select(countryName);
@@ -734,6 +1092,9 @@ public class DashboardController implements Initializable {
         return stateOptions;
     }
 
+    /**
+     * Toggles editable fields for the customers when the edit button is pressed.
+     */
     public void toggleEdit(){
         allCustomersTableView.setDisable(false);
         saveExistingCustomersBtn.setDisable(true);
@@ -754,6 +1115,9 @@ public class DashboardController implements Initializable {
         editExistingCustomerBtn.setText("Edit");
     }
 
+    /**
+     * Toggles editable fields for the appointments when the edit button is pressed.
+     */
     public void toggleApptEdit(){
         allAppointmentsTableView.setDisable(false);
         existingApptTitleTxt.setEditable(false);
@@ -789,6 +1153,12 @@ public class DashboardController implements Initializable {
 
     }
 
+    /**
+     * Converts the given time to UTC. Used mainly for adding times to database from user-entered values
+     * @param date
+     * @return
+     * @throws ParseException
+     */
     public String convertToUTC(String date) throws ParseException {
 
         String[] actualDate = date.split("\\s+");
@@ -806,6 +1176,13 @@ public class DashboardController implements Initializable {
         return customFormat.format(utc);
 
     }
+
+    /**
+     * Takes a given time and converts it to the users local time.
+     * @param date
+     * @return
+     * @throws ParseException
+     */
     public String convertToLocal(String date) throws ParseException {
 
 
@@ -822,6 +1199,13 @@ public class DashboardController implements Initializable {
 
         return customFormat.format(zdt);
     }
+
+    /**
+     * takes a given time and converts it to Eastern Time
+     * @param date
+     * @return
+     * @throws ParseException
+     */
     public String convertToET(String date) throws ParseException {
         String[] actualDate = date.split("\\s+");
         String[] actualTime = actualDate[1].split(":");
@@ -837,16 +1221,31 @@ public class DashboardController implements Initializable {
         return customFormat.format(zdt);
     }
 
+    /**
+     * Takes a given message and displays the message to the user.
+     * @param message
+     */
     public void alertError(String message){
         Alert alert = new Alert(Alert.AlertType.ERROR, message);
         alert.show();
     }
 
+    /**
+     * Successful custom message prompt. Takes in a successful action and displays those results to the user. This is used for things like successfully deleting an appointment.
+     * @param message
+     */
     public void alertSuccessful(String message){
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, message);
         alert.show();
     }
 
+    /**
+     * Takes in the start and end time and verifies that it is within the business hours, and that the start time occurs before the end time
+     * @param startDateTimeUTC
+     * @param endDateTimeUTC
+     * @return
+     * @throws ParseException
+     */
     public boolean appointmentTimeVerification(String startDateTimeUTC, String endDateTimeUTC) throws ParseException {
 
         String startDateTime = convertToET(startDateTimeUTC);
@@ -888,6 +1287,16 @@ public class DashboardController implements Initializable {
         return true;
     }
 
+    /**
+     * Takes in the requested start and end time for an appointment and makes sure it will not interfere with the start and end times of any other appointment on that day
+     * @param rs
+     * @param start
+     * @param end
+     * @param apptID
+     * @return
+     * @throws SQLException
+     * @throws ParseException
+     */
     public boolean overlappingAppointmentsCheck(ResultSet rs, String start, String end, int apptID) throws SQLException, ParseException {
 
         //String startDateTimes[] = null;
@@ -956,32 +1365,50 @@ public class DashboardController implements Initializable {
         return false;
     }
 
+    /**
+     * Checks on login for any appointments upcoming within 15 minutes. Displays a custom message to the user if so, displays a message to the user if there are no appointments upcoming
+     * @param allAppointments
+     * @throws SQLException
+     * @throws ParseException
+     */
     public void checkForUpcomingAppointments(ResultSet allAppointments) throws SQLException, ParseException {
 
-        ArrayList<Date> allAppointmentDates = new ArrayList<>();
+        ArrayList<LocalDateTime> allAppointmentDates = new ArrayList<>();
+        boolean apptExists = false;
 
         while (allAppointments.next()){
             String tempdate = allAppointments.getString("Start");
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date tempDateConverted = sdf.parse(tempdate);
-            allAppointmentDates.add(tempDateConverted);
-        }
+            DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String tempDateConverted = convertToLocal(tempdate);
+            LocalDateTime tempDateFinal = LocalDateTime.parse(tempDateConverted, sdf);
+            allAppointmentDates.add(tempDateFinal);
 
-        String loginTimeUTCString = convertToUTC(loginTime.toString());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date loginTimeUTC = sdf.parse(loginTimeUTCString);
+            for (LocalDateTime d: allAppointmentDates){
+                long dateNow = loginTime;
+                ZonedDateTime zdt = d.atZone(ZoneId.systemDefault());
+                long dateCompare = zdt.toInstant().toEpochMilli();
 
-        System.out.println("checked date login = " + loginTimeUTC);
-        System.out.println("Checked date list = " + allAppointmentDates);
+                //System.out.println(dateCompare + " DATE COMPARE");
+                //System.out.println(dateNow + "DATE NOW");
+                //
+                //System.out.println(TimeUnit.MINUTES.toMillis(15) + "MILLI FOR 15");
 
-        for (Date d: allAppointmentDates){
-            long dateNow = 012312; //loginTime.ofInstant(Instant.ofEpochMilli(m), ZoneId.systemDefault());
-            long dateCompare = d.getTime();
+                String localTimeStart = convertToLocal(allAppointments.getString("Start"));
+                String localTimeEnd = convertToLocal(allAppointments.getString("End"));
 
-            if (Math.abs(dateCompare - dateNow) < TimeUnit.MINUTES.toMillis(15)){
-                Alert alert = new Alert(Alert.AlertType.WARNING, "You have an upcoming appointment within 15 minutes of now!");
-                alert.show();
+
+                if (Math.abs(dateCompare - dateNow) < TimeUnit.MINUTES.toMillis(15)){
+                    Alert alert = new Alert(Alert.AlertType.WARNING, "You have an upcoming appointment within 15 minutes of now! \n" + "Appointment Name: " + allAppointments.getString("Title") + "\n" + "Appointment Date/Time: " + localTimeStart + " TO " + localTimeEnd);
+                    apptExists = true;
+                    alert.show();
+                }
             }
         }
+        if (!apptExists){
+            Alert alert = new Alert(Alert.AlertType.WARNING, "No upcoming appointments!");
+            alert.show();
+        }
+
+
     }
 }

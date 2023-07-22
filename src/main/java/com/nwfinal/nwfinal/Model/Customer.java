@@ -14,6 +14,10 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+
+/**
+ * UNUSED CLASS! DO NOT USE!
+ */
 public class Customer {
 
     private int customerID;

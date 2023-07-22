@@ -15,7 +15,13 @@ import java.util.ResourceBundle;
 public class Main extends Application {
 
 
-
+    /**
+     * Loads login screen
+     * @param stage
+     * @throws IOException
+     * @throws SQLException
+     * @Author Noah Woods
+     */
     @Override
     public void start(Stage stage) throws IOException, SQLException {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("login-page.fxml"));
@@ -25,6 +31,10 @@ public class Main extends Application {
         stage.show();
     }
 
+    /**
+     * launches application
+     * @param args
+     */
     public static void main(String[] args) {
         //Locale.setDefault(new Locale("fr"));
         launch();

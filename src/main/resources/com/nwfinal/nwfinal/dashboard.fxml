@@ -190,13 +190,13 @@
                                     </AnchorPane>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                        <children>
-                                          <RadioButton layoutX="14.0" layoutY="14.0" mnemonicParsing="false" selected="true" text="All Appointments">
+                                          <RadioButton fx:id="allAppointmentsRBtn" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onMouseClicked="#allAppointmentsRBtnClick" selected="true" text="All Appointments">
                                              <toggleGroup>
                                                 <ToggleGroup fx:id="apptTG" />
                                              </toggleGroup>
                                           </RadioButton>
-                                          <RadioButton layoutX="14.0" layoutY="40.0" mnemonicParsing="false" text="This Week" toggleGroup="$apptTG" />
-                                          <RadioButton layoutX="14.0" layoutY="65.0" mnemonicParsing="false" text="This Month" toggleGroup="$apptTG" />
+                                          <RadioButton fx:id="weekAppointmentsRBtn" layoutX="14.0" layoutY="40.0" mnemonicParsing="false" onMouseClicked="#weekAppointmentsRBtnClick" text="This Week" toggleGroup="$apptTG" />
+                                          <RadioButton fx:id="monthAppointmentsRbtn" layoutX="14.0" layoutY="65.0" mnemonicParsing="false" onMouseClicked="#monthAppointmentsRbtnClick" text="This Month" toggleGroup="$apptTG" />
                                        </children>
                                     </AnchorPane>
                                 </items>
@@ -207,5 +207,34 @@
                </children></AnchorPane>
       </content>
     </Tab>
+      <Tab text="Reports">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <Separator layoutX="497.0" layoutY="246.0" orientation="VERTICAL" prefHeight="691.0" prefWidth="6.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="497.0" AnchorPane.topAnchor="0.0" />
+                  <Separator layoutX="400.0" layoutY="344.0" prefHeight="3.0" prefWidth="1000.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="344.0" />
+                  <Label layoutX="114.0" layoutY="6.0" text="Number Of Appointments By Type And Month" />
+                  <ComboBox fx:id="appointmentsByTypeCombo" layoutX="192.0" layoutY="85.0" prefHeight="25.0" prefWidth="107.0" />
+                  <Label layoutX="192.0" layoutY="68.0" text="Type" />
+                  <Label layoutX="192.0" layoutY="127.0" text="Month" />
+                  <ComboBox fx:id="appointmentsByMonthCombo" layoutX="192.0" layoutY="144.0" prefHeight="25.0" prefWidth="107.0" />
+                  <TextField fx:id="appointmentsByTypeOutputTxt" layoutX="192.0" layoutY="232.0" prefHeight="25.0" prefWidth="107.0" />
+                  <Label layoutX="192.0" layoutY="215.0" text="Output" />
+                  <Button layoutX="258.0" layoutY="190.0" mnemonicParsing="false" onAction="#appointmentsByTypeBtn" text="RUN" />
+                  <TableView fx:id="appointmentsByContactTableView" layoutX="503.0" layoutY="23.0" prefHeight="279.0" prefWidth="492.0" />
+                  <Label layoutX="676.0" layoutY="6.0" text="Appoinments By Contact" />
+                  <ComboBox fx:id="appointmentsByContactCombo" layoutX="587.0" layoutY="310.0" prefHeight="25.0" prefWidth="107.0" />
+                  <Label layoutX="503.0" layoutY="314.0" text="Contact Name" />
+                  <Label layoutX="132.0" layoutY="346.0" text="Number of Appointments Created By User" />
+                  <ComboBox fx:id="appointmentsByUserCombo" layoutX="192.0" layoutY="406.0" prefHeight="25.0" prefWidth="107.0" />
+                  <Label layoutX="192.0" layoutY="389.0" text="User" />
+                  <TextField fx:id="appointmentsByUserOutput" layoutX="192.0" layoutY="496.0" prefHeight="25.0" prefWidth="107.0" />
+                  <Label layoutX="192.0" layoutY="479.0" text="Output" />
+                  <Button layoutX="258.0" layoutY="443.0" mnemonicParsing="false" onAction="#appointmentsByUserBtn" text="RUN" />
+                  <Button layoutX="701.0" layoutY="310.0" mnemonicParsing="false" onAction="#appointmentsByContactBtn" text="RUN" />
+               </children>
+            </AnchorPane>
+        </content>
+      </Tab>
   </tabs>
 </TabPane>
